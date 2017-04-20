@@ -1,0 +1,95 @@
+memo = "01382aa8a738416a0c3e813f1503752d185c3d7d1f9dca422104685c48a3648e"
+
+[[projects]]
+  name = "github.com/Sirupsen/logrus"
+  packages = ["."]
+  revision = "51fe59aca108dc5680109e7b2051cbdcfa5a253c"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/StackExchange/wmi"
+  packages = ["."]
+  revision = "ea383cf3ba6ec950874b8486cd72356d007c768f"
+
+[[projects]]
+  name = "github.com/aws/amazon-ecs-agent"
+  packages = ["agent/acs/model/ecsacs","agent/credentials"]
+  revision = "467c3d772d55e02ad618e4901afed1da1173496e"
+  version = "v1.14.1"
+
+[[projects]]
+  name = "github.com/aws/aws-sdk-go"
+  packages = ["aws","aws/awserr","aws/awsutil","aws/credentials","aws/endpoints"]
+  revision = "4bbd6fa3fdede4c68e941248f974b8951c17de89"
+  version = "v1.8.13"
+
+[[projects]]
+  name = "github.com/davecgh/go-spew"
+  packages = ["spew"]
+  revision = "346938d642f2ec3594ed81d874461961cd0faa76"
+  version = "v1.1.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/docker/distribution"
+  packages = ["uuid"]
+  revision = "c3e06c6069653bf72034ed907d6749d3928fdacb"
+
+[[projects]]
+  name = "github.com/fsouza/go-dockerclient"
+  packages = [".","external/github.com/Sirupsen/logrus","external/github.com/docker/docker/opts","external/github.com/docker/docker/pkg/archive","external/github.com/docker/docker/pkg/fileutils","external/github.com/docker/docker/pkg/homedir","external/github.com/docker/docker/pkg/idtools","external/github.com/docker/docker/pkg/ioutils","external/github.com/docker/docker/pkg/longpath","external/github.com/docker/docker/pkg/pools","external/github.com/docker/docker/pkg/promise","external/github.com/docker/docker/pkg/stdcopy","external/github.com/docker/docker/pkg/system","external/github.com/docker/go-units","external/github.com/hashicorp/go-cleanhttp","external/github.com/opencontainers/runc/libcontainer/user","external/golang.org/x/net/context","external/golang.org/x/sys/unix"]
+  revision = "73f08fbacc09c6fd1b7bc179193e58b14d7619cc"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/go-errors/errors"
+  packages = ["."]
+  revision = "8fa88b06e5974e97fbf9899a7f86a344bfd1f105"
+
+[[projects]]
+  name = "github.com/go-ini/ini"
+  packages = ["."]
+  revision = "e7fea39b01aea8d5671f6858f0532f56e8bff3a5"
+  version = "v1.27.0"
+
+[[projects]]
+  name = "github.com/go-ole/go-ole"
+  packages = [".","oleutil"]
+  revision = "0e87ea779d9deb219633b828a023b32e1244dd57"
+  version = "v1.2.0"
+
+[[projects]]
+  name = "github.com/jmespath/go-jmespath"
+  packages = ["."]
+  revision = "3433f3ea46d9f8019119e7dd41274e112a2359a9"
+  version = "0.2.2"
+
+[[projects]]
+  name = "github.com/pmezard/go-difflib"
+  packages = ["difflib"]
+  revision = "792786c7400a136282c1664665ae0a8db921c6c2"
+  version = "v1.0.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/shirou/gopsutil"
+  packages = ["cpu","host","internal/common","mem","net","process"]
+  revision = "70693b6a3da51a8a686d31f1b346077bbc066062"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/shirou/w32"
+  packages = ["."]
+  revision = "bb4de0191aa41b5507caa14b0650cdbddcd9280b"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/stretchr/objx"
+  packages = ["."]
+  revision = "1a9d0bb9f541897e62256577b352fdbc1fb4fd94"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/stretchr/testify"
+  packages = ["assert","mock","require","suite"]
+  revision = "4d4bfba8f1d1027c4fdbe371823030df51419987"
