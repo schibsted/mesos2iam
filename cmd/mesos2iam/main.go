@@ -4,16 +4,14 @@ import (
 	"flag"
 	log "github.com/Sirupsen/logrus"
 	"github.com/fsouza/go-dockerclient"
-	"os"
 	"github.schibsted.io/spt-infrastructure/mesos2iam.git/iptables"
+	"os"
 )
-
 
 func main() {
 	server := NewServer()
 	parseFlags(server)
 	setLogLevel(server.Verbose)
-
 
 	if server.AddIPTablesRule {
 		if err := iptables.AddRules(server.AppPort, server.AwsContainerCredentialsIp, server.HostIP); err != nil {

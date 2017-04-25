@@ -1,15 +1,15 @@
 package main
 
 import (
-	"github.schibsted.io/spt-infrastructure/mesos2iam.git/pkg"
-	"time"
+	log "github.com/Sirupsen/logrus"
 	"github.com/fsouza/go-dockerclient"
 	http_pkg "github.schibsted.io/spt-infrastructure/mesos2iam.git/http"
+	"github.schibsted.io/spt-infrastructure/mesos2iam.git/pkg"
 	"net/http"
-	log "github.com/Sirupsen/logrus"
+	"time"
 )
 
-var(
+var (
 	DEFAULT_HOST_IP                      = "0.0.0.0"
 	DEFAULT_SERVER_PORT                  = "51679"
 	DEFAULT_AWS_CONTAINER_CREDENTIALS_IP = "169.254.170.2"
@@ -37,7 +37,6 @@ func (s *Server) BuildSecurityRequestHandler(dockerClient *docker.Client, smaugU
 	}
 	return http_pkg.NewSecurityRequestHandler(jobFinder, netClient, smaugURL)
 }
-
 
 func (s *Server) Run(dockerClient *docker.Client) {
 	credentialsRequestHandler := s.BuildSecurityRequestHandler(dockerClient, s.SmaugURL)
