@@ -4,25 +4,22 @@ import (
 	"flag"
 	log "github.com/Sirupsen/logrus"
 	"github.com/fsouza/go-dockerclient"
-	http_pkg "github.schibsted.io/spt-infrastructure/mesos2iam.git/http"
-	"github.schibsted.io/spt-infrastructure/mesos2iam.git/pkg"
-	"net/http"
 	"os"
-	"time"
+	"github.schibsted.io/spt-infrastructure/mesos2iam.git/iptables"
 )
 
-var (
-	serverAddr             string
-	DEFAULT_SERVER_ADDRESS = ":51679"
-	verbose                bool
-	smaugURL               string
-	// Smaug is a credentials repository for IAM roles: https://github.schibsted.io/spt-infrastructure/tardis-smaug
-	DEFAULT_SMAUG_URL      = "http://127.0.0.1:8080"
-)
 
 func main() {
-	parseFlags()
-	setLogLevel()
+	server := NewServer()
+	parseFlags(server)
+	setLogLevel(server.Verbose)
+
+
+	if server.AddIPTablesRule {
+		if err := iptables.AddRules(server.AppPort, server.AwsContainerCredentialsIp, server.HostIP); err != nil {
+			log.Fatal(err)
+		}
+	}
 
 	dockerClient, err := docker.NewClientFromEnv()
 	if err != nil {
@@ -30,44 +27,34 @@ func main() {
 		return
 	}
 
-	credentialsRequestHandler := buildSecurityRequestHandler(dockerClient)
-	http.Handle("/v2/credentials", http_pkg.LogHandler(credentialsRequestHandler))
-
-	log.Info("Listening on ", serverAddr)
-	log.Panic(http.ListenAndServe(serverAddr, nil))
+	server.Run(dockerClient)
 }
 
-func parseFlags() {
-	flag.BoolVar(&verbose, "verbose", false, "Enable verbosity")
-	flag.StringVar(&serverAddr,
-		"server-address",
-		getFromEnvOrDefault("MESOS2IAM_SERVER_ADDRESS", DEFAULT_SERVER_ADDRESS),
-		"Server address")
-	flag.StringVar(&smaugURL,
+func parseFlags(server *Server) {
+	flag.BoolVar(&server.Verbose, "verbose", false, "Enable verbosity")
+	flag.BoolVar(&server.AddIPTablesRule, "iptables", false, "Add iptables rule (also requires --host-ip)")
+	flag.StringVar(&server.HostIP, "host-ip", getFromEnvOrDefault("MESOS2IAM_HOST_IP", DEFAULT_HOST_IP),
+		"IP address of host")
+	flag.StringVar(&server.AppPort, "app-port",
+		getFromEnvOrDefault("MESOS2IAM_SERVER_PORT", DEFAULT_SERVER_PORT),
+		"App port")
+
+	flag.StringVar(&server.AwsContainerCredentialsIp, "aws-container-credentials-ip",
+		getFromEnvOrDefault("MESOS2IAM_AWS_CONTAINER_CREDENTIALS_IP", DEFAULT_AWS_CONTAINER_CREDENTIALS_IP),
+		"IP address of aws container credentials host")
+	flag.StringVar(&server.SmaugURL,
 		"smaug-url",
 		getFromEnvOrDefault("MESOS2IAM_SMAUG_URL", DEFAULT_SMAUG_URL),
 		"Smaug Url")
 	flag.Parse()
 }
 
-func setLogLevel() {
+func setLogLevel(verbose bool) {
 	if verbose {
 		log.SetLevel(log.DebugLevel)
 	} else {
 		log.SetLevel(log.InfoLevel)
 	}
-}
-
-func buildSecurityRequestHandler(dockerClient *docker.Client) *http_pkg.SecurityRequestHandler {
-	containerRepository := pkg.NewContainerRepository(dockerClient)
-	pidFinder := pkg.NewPidFinder()
-
-	jobFinder := pkg.NewJobFinder(containerRepository, pidFinder)
-
-	netClient := &http.Client{
-		Timeout: time.Second * 10,
-	}
-	return http_pkg.NewSecurityRequestHandler(jobFinder, netClient, smaugURL)
 }
 
 func getFromEnvOrDefault(variableName string, defaultValue string) string {
