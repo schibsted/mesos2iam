@@ -30,7 +30,3 @@ script:
   - make build
   - bash -ex script/build-rpm.sh
   - if [[ "${TRAVIS_PULL_REQUEST}" == "false" ]]; then art upload *.rpm ${ARTIFACTORY_UPLOAD_PATH}; fi
-
-branches:
-  only:
-    - master
