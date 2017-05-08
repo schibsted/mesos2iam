@@ -67,7 +67,7 @@ errcheck-ci:
 # testing
 
 test:
-	go test -v $(PACKAGES)
+	go test -cover -v $(PACKAGES)
 .PHONY: test
 
 test-ci: linters-ci
