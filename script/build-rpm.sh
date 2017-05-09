@@ -8,6 +8,12 @@ set -e
 DESCRIPTION="Mesos 2 IAM"
 MAINTAINER=vicent.soria@schibsted.com
 URL=http://schibsted.com/
+PACKAGE_NAME=mesos2iam-dev
+
+if [[ -n "${TRAVIS_TAG}" ]]; then
+    echo "We are building a tag. Skipping..."
+    exit 0
+fi
 
 # Inside Travis:
 # * set dummy version for PR builds
@@ -20,6 +26,7 @@ if [[ ${TRAVIS_BRANCH} ]]; then
     let VERSION=${PREVIOUS_VERSION}+1
     git tag v${VERSION}
     git push --tags
+    PACKAGE_NAME=mesos2iam
   fi
 fi
 
@@ -40,7 +47,7 @@ chmod a+x ${PKG_BUILD_DIR}/usr/local/bin/*
 fpm \
   -s dir \
   -t rpm \
-  -n mesos2iam \
+  -n ${PACKAGE_NAME} \
   -v ${VERSION} \
   -m ${MAINTAINER} \
   -d iptables \
