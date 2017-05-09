@@ -57,7 +57,7 @@ func TestDiscoverJobIdFromContainerTestSuite(t *testing.T) {
 
 func TestFindJobIdFromRequestWhenHostMode(t *testing.T) {
 	req, err := http.NewRequest("GET", "/v2/credentials", nil)
-	req.RemoteAddr = "127.0.0.1:10000"
+	req.RemoteAddr = "52.52.52.52:10000"
 
 	if err != nil {
 		t.Fatal(err)
@@ -67,8 +67,9 @@ func TestFindJobIdFromRequestWhenHostMode(t *testing.T) {
 	mockedRepository := getRepositoryMock()
 
 	finder := ContainerJobFinder{
-		repository: mockedRepository,
-		pidFinder:  mockedPidFinder,
+		mockedRepository,
+		mockedPidFinder,
+		"52.52.52.52",
 	}
 
 	jobId, err := finder.FindJobIdFromRequest(req)

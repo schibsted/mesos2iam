@@ -11,10 +11,15 @@ import (
 func main() {
 	server := NewServer()
 	parseFlags(server)
+
+	if server.HostIp == "" {
+		log.Panic("HostIp can't be empty")
+	}
+
 	setLogLevel(server.Verbose)
 
 	if server.AddIPTablesRule {
-		if err := iptables.AddRules(server.AppPort, server.AwsContainerCredentialsIp, server.HostIP); err != nil {
+		if err := iptables.AddRules(server.AppPort, server.AwsContainerCredentialsIp, server.HostIp); err != nil {
 			log.Fatal(err)
 		}
 	}
@@ -22,7 +27,6 @@ func main() {
 	dockerClient, err := docker.NewClientFromEnv()
 	if err != nil {
 		log.Panic(err)
-		return
 	}
 
 	server.Run(dockerClient)
@@ -31,8 +35,10 @@ func main() {
 func parseFlags(server *Server) {
 	flag.BoolVar(&server.Verbose, "verbose", false, "Enable verbosity")
 	flag.BoolVar(&server.AddIPTablesRule, "iptables", false, "Add iptables rule (also requires --host-ip)")
-	flag.StringVar(&server.HostIP, "host-ip", getFromEnvOrDefault("MESOS2IAM_HOST_IP", DEFAULT_HOST_IP),
-		"IP address of host")
+	flag.StringVar(&server.ListeningIp, "listening-ip", getFromEnvOrDefault("MESOS2IAM_LISTENING_IP", DEFAULT_LISTENING_IP),
+		"Listening IP address")
+	flag.StringVar(&server.HostIp, "host-ip", getFromEnvOrDefault("MESOS2IAM_HOST_IP", ""),
+		"Listening IP address")
 	flag.StringVar(&server.AppPort, "app-port",
 		getFromEnvOrDefault("MESOS2IAM_SERVER_PORT", DEFAULT_SERVER_PORT),
 		"App port")

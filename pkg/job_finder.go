@@ -15,19 +15,22 @@ type JobFinder interface {
 	FindJobIdFromRequest(request *http.Request) (string, error)
 }
 
-func NewJobFinder(repository ContainerRepository, pidFinder PidFinder) JobFinder {
+func NewJobFinder(repository ContainerRepository, pidFinder PidFinder, hostIp string) JobFinder {
 	return &ContainerJobFinder{
 		repository,
 		pidFinder,
+		hostIp,
 	}
 }
 
 type ContainerJobFinder struct {
 	repository ContainerRepository
 	pidFinder  PidFinder
+	hostIp		string
 }
 
 func (finder *ContainerJobFinder) FindJobIdFromRequest(request *http.Request) (jobId string, err error) {
+	log.Debugf("Remote address: %s", request.RemoteAddr)
 	ip := getIp(request.RemoteAddr)
 
 	containerFinder := finder.buildContainerFinder(ip, request)
@@ -48,7 +51,7 @@ func (finder *ContainerJobFinder) FindJobIdFromRequest(request *http.Request) (j
 }
 
 func (finder *ContainerJobFinder) buildContainerFinder(ip string, request *http.Request) (containerFinder ContainerFinder) {
-	if ip == "127.0.0.1" {
+	if ip == finder.hostIp {
 		log.Debug("Container in host mode")
 
 		return &ContainerInHostModeFinder{
