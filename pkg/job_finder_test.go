@@ -3,6 +3,7 @@ package pkg
 import (
 	"fmt"
 	"github.com/fsouza/go-dockerclient"
+	"github.com/go-errors/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
@@ -54,9 +55,9 @@ func TestDiscoverJobIdFromContainerTestSuite(t *testing.T) {
 	suite.Run(t, new(DiscoverJobIdFromContainerTestSuite))
 }
 
-func FindJobIdFromRequest(t *testing.T) {
+func TestFindJobIdFromRequestWhenHostMode(t *testing.T) {
 	req, err := http.NewRequest("GET", "/v2/credentials", nil)
-	req.RemoteAddr = "localhost:10000"
+	req.RemoteAddr = "127.0.0.1:10000"
 
 	if err != nil {
 		t.Fatal(err)
@@ -81,13 +82,48 @@ func FindJobIdFromRequest(t *testing.T) {
 	mockedRepository.AssertExpectations(t)
 }
 
-func getRepositoryMock() *MockedRepository {
+func TestFindJobIdFromRequestWhenBridgeMode(t *testing.T) {
+	req, err := http.NewRequest("GET", "/v2/credentials", nil)
+	req.RemoteAddr = "172.17.0.2:10000"
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	mockedPidFinder := getPidFinderMock()
+
+	container := &docker.Container{
+		Config: &docker.Config{
+			Env: []string{"TARDIS_SCHID=4ea13548-caa8-48dc-af69-58a651d9fa3b"},
+		},
+		NetworkSettings: &docker.NetworkSettings{
+			IPAddress: "172.17.0.2",
+		},
+	}
+	mockedRepository := &MockedIpRepository{}
+	mockedRepository.On("FindContainerUsingIp", "172.17.0.2").Return(container, nil)
+
+	finder := ContainerJobFinder{
+		repository: mockedRepository,
+		pidFinder:  mockedPidFinder,
+	}
+
+	jobId, err := finder.FindJobIdFromRequest(req)
+	if err != nil {
+		t.Error(err)
+	}
+
+	assert.Equal(t, "4ea13548-caa8-48dc-af69-58a651d9fa3b", jobId)
+	mockedRepository.AssertExpectations(t)
+}
+
+func getRepositoryMock() *MockedCommandRepository {
 	container := &docker.Container{
 		Config: &docker.Config{
 			Env: []string{"TARDIS_SCHID=4ea13548-caa8-48dc-af69-58a651d9fa3b"},
 		},
 	}
-	mockedRepository := &MockedRepository{}
+	mockedRepository := &MockedCommandRepository{}
 	mockedRepository.On("FindContainerUsingCommandPID", int32(800)).Return(container, nil)
 	return mockedRepository
 }
@@ -98,12 +134,28 @@ func getPidFinderMock() *MockedPidFinder {
 	return mockedPidFinder
 }
 
-type MockedRepository struct {
+type MockedCommandRepository struct {
 	mock.Mock
 }
 
-func (m *MockedRepository) FindContainerUsingCommandPID(pid int32) (*docker.Container, error) {
+func (m *MockedCommandRepository) FindContainerUsingCommandPID(pid int32) (*docker.Container, error) {
 	args := m.Called(pid)
+	container := args.Get(0).(*docker.Container)
+	return container, args.Error(1)
+}
+func (m *MockedCommandRepository) FindContainerUsingIp(ip string) (*docker.Container, error) {
+	return nil, errors.New("Not implemented")
+}
+
+type MockedIpRepository struct {
+	mock.Mock
+}
+
+func (m *MockedIpRepository) FindContainerUsingCommandPID(pid int32) (*docker.Container, error) {
+	return nil, errors.New("Not implemented")
+}
+func (m *MockedIpRepository) FindContainerUsingIp(ip string) (*docker.Container, error) {
+	args := m.Called(ip)
 	container := args.Get(0).(*docker.Container)
 	return container, args.Error(1)
 }
@@ -115,5 +167,4 @@ type MockedPidFinder struct {
 func (m *MockedPidFinder) GetCommandPidByPort(port string) (int32, error) {
 	args := m.Called(port)
 	return int32(args.Int(0)), args.Error(1)
-
 }

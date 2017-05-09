@@ -27,31 +27,42 @@ type ContainerJobFinder struct {
 	pidFinder  PidFinder
 }
 
-func (finder *ContainerJobFinder) FindJobIdFromRequest(request *http.Request) (string, error) {
-	port := getPort(request.RemoteAddr)
-	log.Debug("Remote port: ", port)
+func (finder *ContainerJobFinder) FindJobIdFromRequest(request *http.Request) (jobId string, err error) {
+	ip := getIp(request.RemoteAddr)
 
-	pid, err := finder.pidFinder.GetCommandPidByPort(port)
-	log.Debug("Pid: ", pid)
+	containerFinder := finder.buildContainerFinder(ip, request)
+	container, err := containerFinder.Find()
 
 	if err != nil {
 		log.Error(err.Error())
 		return "", err
 	}
 
-	container, err := finder.repository.FindContainerUsingCommandPID(pid)
-	if err != nil {
-		log.Error(err.Error())
-		return "", err
-	}
-
-	jobId, err := DiscoverJobIDFromContainer(container)
+	jobId, err = DiscoverJobIDFromContainer(container)
 	if err != nil {
 		log.Error(err.Error())
 		return "", err
 	}
 
 	return jobId, nil
+}
+
+func (finder *ContainerJobFinder) buildContainerFinder(ip string, request *http.Request) (containerFinder ContainerFinder) {
+	if ip == "127.0.0.1" {
+		log.Debug("Container in host mode")
+
+		return &ContainerInHostModeFinder{
+			finder.repository,
+			finder.pidFinder,
+			getPort(request.RemoteAddr),
+		}
+	}
+	log.Debug("Container in bridge mode")
+
+	return &ContainerInBridgeModeFinder{
+		finder.repository,
+		ip,
+	}
 }
 
 type PidFinder interface {
@@ -108,4 +119,14 @@ func getPort(addr string) string {
 	}
 
 	return addr[index+1:]
+}
+
+func getIp(addr string) string {
+	index := strings.Index(addr, ":")
+
+	if index < 0 {
+		return addr
+	}
+
+	return addr[:index]
 }

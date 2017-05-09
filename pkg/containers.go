@@ -15,6 +15,7 @@ var (
 
 type ContainerRepository interface {
 	FindContainerUsingCommandPID(pid int32) (*docker.Container, error)
+	FindContainerUsingIp(ip string) (*docker.Container, error)
 }
 
 func NewContainerRepository(client *docker.Client) *DockerContainerRepository {
@@ -75,6 +76,76 @@ func (repository *DockerContainerRepository) FindContainerUsingCommandPID(pid in
 	}
 
 	return container, nil
+}
+
+func (repository *DockerContainerRepository) FindContainerUsingIp(ip string) (*docker.Container, error) {
+	containers, err := repository.docker.ListContainers(docker.ListContainersOptions{})
+
+	if err != nil {
+		log.Error(err.Error())
+		return nil, err
+	}
+
+	for _, container := range containers {
+		containerInfo, err := repository.docker.InspectContainer(container.ID)
+
+		if err != nil {
+			log.Error(err.Error())
+			return nil, err
+		}
+
+		if ip == containerInfo.NetworkSettings.IPAddress {
+			log.Debug("Found IP: ", ip)
+
+			return containerInfo, nil
+		}
+	}
+
+	return nil, errors.Errorf("Container with ip %s does not exist", ip)
+}
+
+type ContainerFinder interface {
+	Find() (*docker.Container, error)
+}
+
+type ContainerInHostModeFinder struct {
+	repository ContainerRepository
+	pidFinder  PidFinder
+	port       string
+}
+
+func (finder *ContainerInHostModeFinder) Find() (*docker.Container, error) {
+	log.Debug("Remote port: ", finder.port)
+
+	pid, err := finder.pidFinder.GetCommandPidByPort(finder.port)
+	log.Debug("Pid: ", pid)
+
+	if err != nil {
+		log.Error(err.Error())
+		return nil, err
+	}
+
+	container, err := finder.repository.FindContainerUsingCommandPID(pid)
+	if err != nil {
+		log.Error(err.Error())
+		return nil, err
+	}
+	return container, err
+}
+
+type ContainerInBridgeModeFinder struct {
+	repository ContainerRepository
+	ip         string
+}
+
+func (finder *ContainerInBridgeModeFinder) Find() (*docker.Container, error) {
+	container, err := finder.repository.FindContainerUsingIp(finder.ip)
+	if err != nil {
+		log.Error(err.Error())
+		return nil, err
+	}
+
+	return container, err
 }
 
 func findJobID(container *docker.Container) (string, error) {
