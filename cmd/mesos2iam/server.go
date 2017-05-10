@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	DEFAULT_HOST_IP                      = "0.0.0.0"
+	DEFAULT_LISTENING_IP                 = "0.0.0.0"
 	DEFAULT_SERVER_PORT                  = "51679"
 	DEFAULT_AWS_CONTAINER_CREDENTIALS_IP = "169.254.170.2"
 	// Smaug is a credentials repository for IAM roles: https://github.schibsted.io/spt-infrastructure/tardis-smaug
@@ -18,7 +18,8 @@ var (
 )
 
 type Server struct {
-	HostIP                    string
+	ListeningIp               string
+	HostIp	                  string
 	AppPort                   string
 	Verbose                   bool
 	AddIPTablesRule           bool
@@ -30,7 +31,7 @@ func (s *Server) BuildSecurityRequestHandler(dockerClient *docker.Client, smaugU
 	containerRepository := pkg.NewContainerRepository(dockerClient)
 	pidFinder := pkg.NewPidFinder()
 
-	jobFinder := pkg.NewJobFinder(containerRepository, pidFinder)
+	jobFinder := pkg.NewJobFinder(containerRepository, pidFinder, s.HostIp)
 
 	netClient := &http.Client{
 		Timeout: time.Second * 10,
@@ -42,8 +43,9 @@ func (s *Server) Run(dockerClient *docker.Client) {
 	credentialsRequestHandler := s.BuildSecurityRequestHandler(dockerClient, s.SmaugURL)
 	http.Handle("/v2/credentials", http_pkg.LogHandler(credentialsRequestHandler))
 
-	serverAddr := s.HostIP + ":" + s.AppPort
+	serverAddr := s.ListeningIp + ":" + s.AppPort
 	log.Info("Listening on ", serverAddr)
+	log.Info("Host IP: ", s.HostIp)
 	log.Panic(http.ListenAndServe(serverAddr, nil))
 
 }
@@ -51,7 +53,8 @@ func (s *Server) Run(dockerClient *docker.Client) {
 // NewServer will create a new Server with default values.
 func NewServer() *Server {
 	return &Server{
-		DEFAULT_HOST_IP,
+		DEFAULT_LISTENING_IP,
+		"",
 		DEFAULT_SERVER_PORT,
 		false,
 		false,
