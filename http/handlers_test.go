@@ -6,7 +6,7 @@ import (
 	"github.com/go-errors/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	http_pkg "github.schibsted.io/spt-infrastructure/mesos2iam.git/http"
+	http_pkg "github.com/schibsted/mesos2iam/http"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -27,7 +27,7 @@ func TestSecurityRequestHandler(t *testing.T) {
 
 	netClient := getMockNetClient("/credentials/" + jobId)
 
-	securityRequestHandler := http_pkg.NewSecurityRequestHandler(mockedJobFinder, netClient, "http://fakeSmaugUrl")
+	securityRequestHandler := http_pkg.NewSecurityRequestHandler(mockedJobFinder, netClient, "http://fakeSmaugUrl", "TARDIS_SCHID")
 	writer := httptest.NewRecorder()
 
 	securityRequestHandler.ServeHTTP(writer, req)
@@ -48,7 +48,7 @@ func TestSecurityRequestHandlerInvalidJobId(t *testing.T) {
 	mockedJobFinder.On("FindJobIdFromRequest", req).Return("invalidJobid", nil)
 
 	netClient := getMockNetClient("/credentials/")
-	securityRequestHandler := http_pkg.NewSecurityRequestHandler(mockedJobFinder, netClient, "http://fakeSmaugUrl")
+	securityRequestHandler := http_pkg.NewSecurityRequestHandler(mockedJobFinder, netClient, "http://fakeSmaugUrl", "TARDIS_SCHID")
 	writer := httptest.NewRecorder()
 
 	securityRequestHandler.ServeHTTP(writer, req)

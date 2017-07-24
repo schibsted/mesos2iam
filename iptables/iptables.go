@@ -19,20 +19,20 @@ func AddRules(appPort, metadataAddress, hostIp string) error {
 	table := "nat"
 
 	rulespec := []string{"-p", "tcp",
-			     "-d", metadataAddress,
-			     "--dport", "80",
-			     "-j", "DNAT",
-			     "--to-destination", hostIp + ":" + appPort}
+		"-d", metadataAddress,
+		"--dport", "80",
+		"-j", "DNAT",
+		"--to-destination", hostIp + ":" + appPort}
 	err = insertIfDoesNotExist(ipt, table, "PREROUTING", 1, rulespec)
 	if err != nil {
 		return err
 	}
 
 	rulespec = []string{"-p", "tcp",
-			    "-m", "tcp",
-			    "-d", metadataAddress,
-			    "--dport", "80",
-			    "-j", "REDIRECT", "--to-ports", appPort}
+		"-m", "tcp",
+		"-d", metadataAddress,
+		"--dport", "80",
+		"-j", "REDIRECT", "--to-ports", appPort}
 	err = insertIfDoesNotExist(ipt, table, "OUTPUT", 1, rulespec)
 	if err != nil {
 		return err

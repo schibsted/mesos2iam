@@ -5,11 +5,18 @@ GOLINT := $(shell which golint)
 ERRCHECK := $(shell which errcheck)
 GO_CARPET := $(shell which go-carpet)
 
-default: linters test
+default: linters test build
 
 # build tools
 build:
-	go build -o mesos2iam cmd/mesos2iam/*.go
+	go build -o build/mesos2iam cmd/mesos2iam/*.go
+.PHONY: build
+
+cross:
+   CGO_ENABLED=0 GOOS=linux go build -o build/mesos2iam cmd/mesos2iam/*.go
+
+rpm:
+	bash -ex script/build-rpm.sh
 .PHONY: build
 
 # lint tools

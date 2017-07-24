@@ -70,6 +70,7 @@ func TestFindJobIdFromRequestWhenHostMode(t *testing.T) {
 		mockedRepository,
 		mockedPidFinder,
 		"52.52.52.52",
+		"TARDIS_SCHID=",
 	}
 
 	jobId, err := finder.FindJobIdFromRequest(req)
@@ -107,6 +108,7 @@ func TestFindJobIdFromRequestWhenBridgeMode(t *testing.T) {
 	finder := ContainerJobFinder{
 		repository: mockedRepository,
 		pidFinder:  mockedPidFinder,
+		idPrefix:   "TARDIS_SCHID=",
 	}
 
 	jobId, err := finder.FindJobIdFromRequest(req)

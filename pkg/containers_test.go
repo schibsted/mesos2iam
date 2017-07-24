@@ -3,7 +3,7 @@ package pkg_test
 import (
 	"github.com/fsouza/go-dockerclient"
 	"github.com/stretchr/testify/assert"
-	"github.schibsted.io/spt-infrastructure/mesos2iam.git/pkg"
+	"github.com/schibsted/mesos2iam/pkg"
 	"testing"
 )
 
@@ -14,7 +14,7 @@ func TestDiscoverApplicationFromContainerReturnsApplicationName(t *testing.T) {
 		},
 	}
 
-	applicationName, err := pkg.DiscoverJobIDFromContainer(container)
+	applicationName, err := pkg.DiscoverJobIDFromContainer(container, "TARDIS_SCHID=")
 
 	assert.Equal(t, err, nil)
 	assert.Equal(t, "4ea13548-caa8-48dc-af69-58a651d9fa3b", applicationName)
@@ -27,7 +27,7 @@ func TestDiscoverApplicationFromContainerReturnsErrorIfMesosTaskIdDoesNotExist(t
 		},
 	}
 
-	applicationName, err := pkg.DiscoverJobIDFromContainer(container)
+	applicationName, err := pkg.DiscoverJobIDFromContainer(container, "TARDIS_SCHID=")
 
 	if assert.Error(t, err, "An error was expected if TARDIS_SCHID envvar does not exist") {
 		assert.Equal(t, err.Error(), "Couldn't get TARDIS_SCHID environment variable from container")
@@ -42,7 +42,7 @@ func TestDiscoverApplicationFromContainerReturnsErrorIfCanNotGetApplicationName(
 		},
 	}
 
-	applicationName, err := pkg.DiscoverJobIDFromContainer(container)
+	applicationName, err := pkg.DiscoverJobIDFromContainer(container, "TARDIS_SCHID=")
 
 	if assert.Error(t, err, "An error was expected if TARDIS_SCHID does not contain a valid uuid") {
 		assert.Equal(t, err.Error(), "SCHID \"stupidcontent\" is not a valid uuidv4")

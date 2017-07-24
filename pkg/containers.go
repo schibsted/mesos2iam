@@ -9,24 +9,22 @@ import (
 	"strings"
 )
 
-var (
-	TARDIS_SCHID_PREFIX = "TARDIS_SCHID="
-)
-
 type ContainerRepository interface {
 	FindContainerUsingCommandPID(pid int32) (*docker.Container, error)
 	FindContainerUsingIp(ip string) (*docker.Container, error)
 }
 
-func NewContainerRepository(client *docker.Client) *DockerContainerRepository {
+func NewContainerRepository(client *docker.Client, mesos2IamPrefix string) *DockerContainerRepository {
 	return &DockerContainerRepository{
-		client,
+		docker:          client,
+		mesos2IamPrefix: mesos2IamPrefix,
 	}
 }
 
 // implements ContainerRepository
 type DockerContainerRepository struct {
-	docker *docker.Client
+	docker          *docker.Client
+	mesos2IamPrefix string
 }
 
 func (repository *DockerContainerRepository) findByContainerPID(pid int32) (*docker.Container, error) {
@@ -148,18 +146,18 @@ func (finder *ContainerInBridgeModeFinder) Find() (*docker.Container, error) {
 	return container, err
 }
 
-func findJobID(container *docker.Container) (string, error) {
+func findJobID(container *docker.Container, idPrefix string) (string, error) {
 	for _, envvar := range container.Config.Env {
-		if strings.HasPrefix(envvar, TARDIS_SCHID_PREFIX) {
-			return strings.TrimPrefix(envvar, TARDIS_SCHID_PREFIX), nil
+		if strings.HasPrefix(envvar, idPrefix) {
+			return strings.TrimPrefix(envvar, idPrefix), nil
 		}
 	}
 
 	return "", errors.Errorf("Couldn't get TARDIS_SCHID environment variable from container")
 }
 
-func DiscoverJobIDFromContainer(container *docker.Container) (string, error) {
-	jobID, err := findJobID(container)
+func DiscoverJobIDFromContainer(container *docker.Container, idPrefix string) (string, error) {
+	jobID, err := findJobID(container, idPrefix)
 	if err != nil {
 		log.Error(err)
 		return "", err

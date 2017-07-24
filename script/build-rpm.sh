@@ -40,10 +40,10 @@ SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )"
 PKG_BUILD_DIR="/tmp/rpm.${RANDOM}"; mkdir "${PKG_BUILD_DIR}"
 
 mkdir -p ${PKG_BUILD_DIR}/etc/init ${PKG_BUILD_DIR}/opt/mesos2iam/sbin
-cp mesos2iam ${PKG_BUILD_DIR}/opt/mesos2iam/sbin/
-cp ${SCRIPT_DIR}/../deploy/* ${PKG_BUILD_DIR}/ -R
+cp build/mesos2iam ${PKG_BUILD_DIR}/opt/mesos2iam/sbin/
+cp -R ${SCRIPT_DIR}/../deploy/* ${PKG_BUILD_DIR}/
 chmod a+x ${PKG_BUILD_DIR}/usr/local/bin/*
-
+pushd build
 fpm \
   -s dir \
   -t rpm \
@@ -58,3 +58,4 @@ fpm \
   -C ${PKG_BUILD_DIR}
 
 rm -rf ${PKG_BUILD_DIR}
+popd

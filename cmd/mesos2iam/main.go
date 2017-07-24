@@ -4,7 +4,7 @@ import (
 	"flag"
 	log "github.com/Sirupsen/logrus"
 	"github.com/fsouza/go-dockerclient"
-	"github.schibsted.io/spt-infrastructure/mesos2iam.git/iptables"
+	"github.com/schibsted/mesos2iam/iptables"
 	"os"
 )
 
@@ -46,10 +46,14 @@ func parseFlags(server *Server) {
 	flag.StringVar(&server.AwsContainerCredentialsIp, "aws-container-credentials-ip",
 		getFromEnvOrDefault("MESOS2IAM_AWS_CONTAINER_CREDENTIALS_IP", DEFAULT_AWS_CONTAINER_CREDENTIALS_IP),
 		"IP address of aws container credentials host")
-	flag.StringVar(&server.SmaugURL,
-		"smaug-url",
-		getFromEnvOrDefault("MESOS2IAM_SMAUG_URL", DEFAULT_SMAUG_URL),
-		"Smaug Url")
+	flag.StringVar(&server.CredentialsURL,
+		"credentials-url",
+		getFromEnvOrDefault("MESOS2IAM_CREDENTIALS_URL", DEFAULT_CREDENTIALS_URL),
+		"Credentials Url")
+	flag.StringVar(&server.Mesos2IamPrefix,
+		"mesos-2-iam-prefix",
+		getFromEnvOrDefault("MESOS2IAM_PREFIX", DEFAULT_MESOS_2_IAM_PREFIX),
+		"Mesos2Iam prefix to parse the id to be sent to credentials url")
 	flag.Parse()
 }
 

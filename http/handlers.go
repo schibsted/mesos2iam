@@ -6,25 +6,27 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/aws/amazon-ecs-agent/agent/credentials"
 	"github.com/docker/distribution/uuid"
-	"github.schibsted.io/spt-infrastructure/mesos2iam.git/pkg"
+	"github.com/schibsted/mesos2iam/pkg"
 	"io/ioutil"
 	"net/http"
 	"strings"
 	"time"
 )
 
-func NewSecurityRequestHandler(finder pkg.JobFinder, httpClient *http.Client, smaugUrl string) *SecurityRequestHandler {
+func NewSecurityRequestHandler(finder pkg.JobFinder, httpClient *http.Client, credentialsUrl string, idPrefix string) *SecurityRequestHandler {
 	return &SecurityRequestHandler{
 		finder,
 		httpClient,
-		smaugUrl,
+		credentialsUrl,
+		idPrefix,
 	}
 }
 
 type SecurityRequestHandler struct {
 	JobFinder pkg.JobFinder
 	netClient *http.Client
-	smaugUrl  string
+	credentialsUrl  string
+	idPrefix  string
 }
 
 func (h *SecurityRequestHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -48,7 +50,7 @@ func (h *SecurityRequestHandler) ServeHTTP(w http.ResponseWriter, r *http.Reques
 
 	log.Debug("JobId found: " + jobId)
 
-	response, err := h.netClient.Get(fmt.Sprintf("%s/credentials/%s", h.smaugUrl, jobId))
+	response, err := h.netClient.Get(fmt.Sprintf("%s/credentials/%s", h.credentialsUrl, jobId))
 
 	if err != nil {
 		errorMessage := fmt.Sprintf("Couldn't get credentials from Smaug: %s", err.Error())

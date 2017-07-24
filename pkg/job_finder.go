@@ -15,18 +15,20 @@ type JobFinder interface {
 	FindJobIdFromRequest(request *http.Request) (string, error)
 }
 
-func NewJobFinder(repository ContainerRepository, pidFinder PidFinder, hostIp string) JobFinder {
+func NewJobFinder(repository ContainerRepository, pidFinder PidFinder, hostIp, idPrefix string) JobFinder {
 	return &ContainerJobFinder{
 		repository,
 		pidFinder,
 		hostIp,
+		idPrefix,
 	}
 }
 
 type ContainerJobFinder struct {
 	repository ContainerRepository
 	pidFinder  PidFinder
-	hostIp		string
+	hostIp     string
+	idPrefix   string
 }
 
 func (finder *ContainerJobFinder) FindJobIdFromRequest(request *http.Request) (jobId string, err error) {
@@ -41,7 +43,7 @@ func (finder *ContainerJobFinder) FindJobIdFromRequest(request *http.Request) (j
 		return "", err
 	}
 
-	jobId, err = DiscoverJobIDFromContainer(container)
+	jobId, err = DiscoverJobIDFromContainer(container, finder.idPrefix)
 	if err != nil {
 		log.Error(err.Error())
 		return "", err

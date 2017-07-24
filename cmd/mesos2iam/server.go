@@ -3,8 +3,8 @@ package main
 import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/fsouza/go-dockerclient"
-	http_pkg "github.schibsted.io/spt-infrastructure/mesos2iam.git/http"
-	"github.schibsted.io/spt-infrastructure/mesos2iam.git/pkg"
+	http_pkg "github.com/schibsted/mesos2iam/http"
+	"github.com/schibsted/mesos2iam/pkg"
 	"net/http"
 	"time"
 )
@@ -13,34 +13,36 @@ var (
 	DEFAULT_LISTENING_IP                 = "0.0.0.0"
 	DEFAULT_SERVER_PORT                  = "51679"
 	DEFAULT_AWS_CONTAINER_CREDENTIALS_IP = "169.254.170.2"
-	// Smaug is a credentials repository for IAM roles: https://github.schibsted.io/spt-infrastructure/tardis-smaug
-	DEFAULT_SMAUG_URL = "http://127.0.0.1:8080"
+	// A custom credentials repository for IAM roles
+	DEFAULT_CREDENTIALS_URL    = "http://127.0.0.1:8080"
+	DEFAULT_MESOS_2_IAM_PREFIX = "TARDIS_SCHID="
 )
 
 type Server struct {
 	ListeningIp               string
-	HostIp	                  string
+	HostIp                    string
 	AppPort                   string
 	Verbose                   bool
 	AddIPTablesRule           bool
 	AwsContainerCredentialsIp string
-	SmaugURL                  string
+	CredentialsURL            string
+	Mesos2IamPrefix           string
 }
 
-func (s *Server) BuildSecurityRequestHandler(dockerClient *docker.Client, smaugURL string) *http_pkg.SecurityRequestHandler {
-	containerRepository := pkg.NewContainerRepository(dockerClient)
+func (s *Server) BuildSecurityRequestHandler(dockerClient *docker.Client, credentialsURL string) *http_pkg.SecurityRequestHandler {
+	containerRepository := pkg.NewContainerRepository(dockerClient, s.Mesos2IamPrefix)
 	pidFinder := pkg.NewPidFinder()
 
-	jobFinder := pkg.NewJobFinder(containerRepository, pidFinder, s.HostIp)
+	jobFinder := pkg.NewJobFinder(containerRepository, pidFinder, s.HostIp, s.Mesos2IamPrefix)
 
 	netClient := &http.Client{
 		Timeout: time.Second * 10,
 	}
-	return http_pkg.NewSecurityRequestHandler(jobFinder, netClient, smaugURL)
+	return http_pkg.NewSecurityRequestHandler(jobFinder, netClient, credentialsURL, s.Mesos2IamPrefix)
 }
 
 func (s *Server) Run(dockerClient *docker.Client) {
-	credentialsRequestHandler := s.BuildSecurityRequestHandler(dockerClient, s.SmaugURL)
+	credentialsRequestHandler := s.BuildSecurityRequestHandler(dockerClient, s.CredentialsURL)
 	http.Handle("/v2/credentials", http_pkg.LogHandler(credentialsRequestHandler))
 
 	serverAddr := s.ListeningIp + ":" + s.AppPort
@@ -59,6 +61,7 @@ func NewServer() *Server {
 		false,
 		false,
 		DEFAULT_AWS_CONTAINER_CREDENTIALS_IP,
-		DEFAULT_SMAUG_URL,
+		DEFAULT_CREDENTIALS_URL,
+		DEFAULT_MESOS_2_IAM_PREFIX,
 	}
 }
