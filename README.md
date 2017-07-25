@@ -75,3 +75,7 @@ and returns the credentials to the aws-sdk
 ```
 
 So its up to every user how they implement the service that returns the aws credentials.
+
+##### Licensing
+
+Apache-2
