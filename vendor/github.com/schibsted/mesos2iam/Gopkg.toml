@@ -1,0 +1,28 @@
+
+[[dependencies]]
+  name = "github.com/Sirupsen/logrus"
+  revision = "51fe59aca108dc5680109e7b2051cbdcfa5a253c"
+
+[[dependencies]]
+  branch = "master"
+  name = "github.com/aws/amazon-ecs-agent"
+
+[[dependencies]]
+  branch = "master"
+  name = "github.com/docker/distribution"
+
+[[dependencies]]
+  name = "github.com/fsouza/go-dockerclient"
+  revision = "73f08fbacc09c6fd1b7bc179193e58b14d7619cc"
+
+[[dependencies]]
+  branch = "master"
+  name = "github.com/go-errors/errors"
+
+[[dependencies]]
+  branch = "master"
+  name = "github.com/shirou/gopsutil"
+
+[[dependencies]]
+  branch = "master"
+  name = "github.com/stretchr/testify"
