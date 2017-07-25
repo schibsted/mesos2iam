@@ -19,12 +19,12 @@ mesos2iam is supposed to run as a daemon inside mesos agents.
 Environment variables to be set before running mesos2iam and there default values.
 
 ```
-MESOS2IAM_LISTENING_IP             		= "0.0.0.0"
-MESOS2IAM_HOST_IP                  		= ""
-MESOS2IAM_SERVER_PORT			   		= 51679
-MESOS2IAM_AWS_CONTAINER_CREDENTIALS_IP 	= "169.254.170.2"
-MESOS2IAM_CREDENTIALS_URL 				= "http://127.0.0.1:8080"
-MESOS2IAM_PREFIX 						= "TARDIS_SCHID="
+MESOS2IAM_LISTENING_IP				= "0.0.0.0"
+MESOS2IAM_HOST_IP				= ""
+MESOS2IAM_SERVER_PORT				= 51679
+MESOS2IAM_AWS_CONTAINER_CREDENTIALS_IP		= "169.254.170.2"
+MESOS2IAM_CREDENTIALS_URL			= "http://127.0.0.1:8080"
+MESOS2IAM_PREFIX				= "TARDIS_SCHID="
 ```
 
 **Build**
