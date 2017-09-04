@@ -2,8 +2,8 @@ package pkg_test
 
 import (
 	"github.com/fsouza/go-dockerclient"
-	"github.com/stretchr/testify/assert"
 	"github.com/schibsted/mesos2iam/pkg"
+	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
