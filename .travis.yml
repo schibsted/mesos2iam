@@ -1,0 +1,11 @@
+language: go
+go:
+- 1.8.x
+go_import_path: github.com/schibsted/mesos2iam
+script:
+- make test
+after_success:
+- if [ -n "$TRAVIS_TAG" ]; then make publish; fi
+env:
+  global:
+    secure: L5fOClDXj9Sj/cnJsiWuIIcewvKfFnAQHCOAzacGqYejCwUSw/nRFXvFqjipMHkttXc/YNttv9BoE+1S0JJchyso84RPPGGYqqxyhQ+xABPH0/i7Fm4WJEG6n2q8ve3USQ8H738wGUouQhVZ8/t4M7Ety89L6oG3zeUVnAO7ux2IDLekoOu2bnxJkREEpIYrujEV85S2N6Xqi3PU2u/eV61O+Xmu++jWX49bj7mgJ18FbEviJjvUG0uxdHsU/jhPcK1TwYyFnFfam9DVE0JNPa5/dt2Fm07sh8F3150o8VT3VtAlbmZDhHsUIv3MUnHBi04bkW3VwdnWuUsij0tj0xg5PKYW90YNax/mgVZzXhwD7jFShqTdzBhwPYAjaPLtqbQYDRlXcbEP2P0nHGYqC6vEkQFgFoSvOY2Ny5MCSsPRvGnb1B9BsU0T5CyZxP1OfqnTpjm83L/XXpvnb+ssQHQrfprPi0unagbv8yyPsN1RiOdhbaHu7fE7zYfud7nnVI6Ab0KG5XCQm2Q4keA56BIcmomrw9AfUTKVBL4a0xAiu/GaRhtlEkKO5PMN6/4FJKtbaM2pEye935AWU5lCUdJUs7kMxndZpUaPdfmxPYkYiBpY8fSTdfi0RF5UURu1llMfOsA2sztw6aqIn8bUvDZsaR3BEgo6sQ5eQDTEtk8=

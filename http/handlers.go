@@ -23,10 +23,10 @@ func NewSecurityRequestHandler(finder pkg.JobFinder, httpClient *http.Client, cr
 }
 
 type SecurityRequestHandler struct {
-	JobFinder pkg.JobFinder
-	netClient *http.Client
-	credentialsUrl  string
-	idPrefix  string
+	JobFinder      pkg.JobFinder
+	netClient      *http.Client
+	credentialsUrl string
+	idPrefix       string
 }
 
 func (h *SecurityRequestHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
